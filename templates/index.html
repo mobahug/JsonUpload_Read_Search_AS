@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		{% load static %}
+		<link rel="stylesheet" href="{% static 'base/styles.css' %}" />
+		<title>Home page</title>
+	</head>
+	<body>
+		<div class="header">
+			<h1>Upload material</h1>
+			<form action="/" method="post" enctype="multipart/form-data">
+				{% csrf_token %} {{ form }}
+				<br />
+				<button type="submit">Upload</button>
+			</form>
+			<h1>Vehicle data</h1>
+			<input id="search" type="text" placeholder="Search..." />
+		</div>
+
+		<div class="table-view">
+			<div class="table-inner">
+				<table>
+					<thead>
+						<tr></tr>
+						<tr>
+							<th><b>Year</b></th>
+							<th><b>Make</b></th>
+							<th><b>Model</b></th>
+							<th><b>Rejection%</b></th>
+							<th><b>Rejection reason #1</b></th>
+							<th><b>Rejection reason #2</b></th>
+							<th><b>Rejection reason #3</b></th>
+						</tr>
+						<tr>
+							<th style="background-color: white">
+								<hr
+									width="710%"
+									style="border: 1px solid black"
+								/>
+							</th>
+						</tr>
+					</thead>
+
+					<tbody id="table_data"></tbody>
+				</table>
+			</div>
+		</div>
+
+		<script>
+			const data = "{{ json_data }}";
+			parsed_data = JSON.parse(data.replace(/&quot;/g, '"'));
+
+			const uploadFile = document.getElementById("id_file");
+			const input = document.getElementById("search");
+			const tableInner = document.querySelector(".table-inner");
+
+			input.value = "";
+
+			if (parsed_data.length == 0) {
+				tableInner.innerHTML = "<h2>Upload the correct JSON file!</h2>";
+			}
+
+			// Show initially all cars
+			const allCars = [...parsed_data];
+			allCars.splice(50);
+			allCars.map((item) => {
+				table_data.innerHTML += `
+                  <tr>
+                    <td>${item["model_year"]}</td>
+                    <td>${item["make"]}</td>
+                    <td>${item["model"]}</td>
+                    <td>${item["rejection_percentage"]}%</td>
+                    <td>${item["reason_1"]}</td>
+                    <td>${item["reason_2"]}</td>
+                    <td>${item["reason_3"]}</td>
+                  </tr>
+            `;
+			});
+
+			let filteredArr = [];
+
+			uploadFile.addEventListener("change", (e) => {
+				selectedFile.innerHTML = uploadFile.files[0].name;
+			});
+
+			input.addEventListener("keyup", (e) => {
+				query = e.target.value.toLowerCase();
+				table_data.innerHTML = "";
+				let searchArr = [];
+
+				if (query.trim().indexOf(" ") != -1) {
+					searchArr = query.trim().split(" ");
+				}
+
+        //handling search words with space between
+				if (searchArr.length > 1) {
+					filteredArr = parsed_data.filter(
+						(vehicle) =>
+							vehicle["make"]
+								.toLowerCase()
+								.includes(searchArr[0]) ||
+							vehicle["model"]
+								.toLowerCase()
+								.includes(searchArr[0])
+					);
+					if (filteredArr.length > 0) {
+						let search = [...searchArr];
+						let tempArr = [...filteredArr];
+						search.shift();
+						filteredArr = tempArr.filter((vehicle) =>
+							search.some(
+								(item) =>
+									vehicle["make"]
+										.toLowerCase()
+										.includes(item) ||
+									vehicle["model"]
+										.toLowerCase()
+										.includes(item)
+							)
+						);
+					}
+				} else {
+					filteredArr = parsed_data.filter(
+						(vehicle) =>
+							vehicle["make"]
+								.toLowerCase()
+								.includes(query.trim()) ||
+							vehicle["model"]
+								.toLowerCase()
+								.includes(query.trim())
+					);
+				}
+
+        //print and limit search result to 50
+				if (filteredArr.length > 0) {
+					filteredArr.splice(50);
+					filteredArr.map((item) => {
+						table_data.innerHTML += `
+                  <tr>
+                    <td>${item["model_year"]}</td>
+                    <td>${item["make"]}</td>
+                    <td>${item["model"]}</td>
+                    <td>${item["rejection_percentage"]}</td>
+                    <td>${item["reason_1"]}</td>
+                    <td>${item["reason_2"]}</td>
+                    <td>${item["reason_3"]}</td>
+                  </tr>
+            `;
+					});
+				} else {
+					table_data.innerHTML = "The searched car not found!";
+				}
+			});
+		</script>
+	</body>
+</html>

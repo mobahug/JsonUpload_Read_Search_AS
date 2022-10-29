@@ -1,0 +1,54 @@
+
+:root {
+  --light-grey: #dbdbdb;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: left;
+  margin-left: 5%;
+}
+
+.main-header {
+  margin: 1rem 0 2rem 0;
+}
+
+#selectedFile {
+  color: var(--light-grey);
+}
+
+#search {
+  max-width: 25%;
+  margin-bottom: 1rem
+}
+
+.table-view {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.table-inner h2 {
+  margin-bottom: 0;
+}
+
+.table-inner p {
+  text-align: center;
+}
+
+table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 90vw;
+}
+
+tr:nth-child(odd) {
+  background-color: var(--light-grey);
+}
+
+td {
+  text-align: center;
+  padding: .5rem 0;
+}
+
